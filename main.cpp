@@ -46,7 +46,7 @@ int getMathExpressionResult(char *m_expression)
 {
 	for(int i = 0; m_expression[i]!='\0';i++)
 	{
-		calculateExpression
+		
 	}
 }
 
