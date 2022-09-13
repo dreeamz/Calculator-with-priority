@@ -44,16 +44,16 @@ int getMathExpressionSizeFromBuffer(char *buffer)
 	return size;
 }
 
-int calculateMathExpression(char *m_expression)
+int calculateMathExpression(char *m_expression, int l, int r)
 {
-	if (m_expression == nullptr)
+	if (m_expression == nullptr || l == r)
 		return 0;
 
-	int result = getIntFromAsci(m_expression[0]);
+	int result = getIntFromAsci(m_expression[l]);
 	int temp = 0;
 	char operation = ' ';
 
-	for (int i = 0; m_expression[i] != '\0'; i++)
+	for (int i = l; i < r; i++)
 	{
 		if (i % 2 == 0)
 		{
@@ -69,11 +69,28 @@ int calculateMathExpression(char *m_expression)
 	return result;
 }
 
+int calculate(char *m_expression)
+{
+	return 0;
+}
+
 int partitionMathExpression(char *m_expression)
 {
+	int left = 0, right = 0;
+	int result = 0;
 	for (int i = 0; m_expression[i] != '\0'; i++)
 	{
-		
+		right = i;
+		if (m_expression[i] == '+')
+		{
+			//result += partitionMathExpression(m_expression, left, right);
+			left = right + 1;
+		}
+		else if (m_expression[i] == '-')
+		{
+			//result -= partitionMathExpression(m_expression, left, right);
+			left = right + 1;
+		}
 	}
 	return 0;
 }
@@ -89,6 +106,6 @@ int main()
 
 	std::cout << math_expression;
 	std::cout << '\n';
-	std::cout << "Unswer :" << calculateMathExpression(math_expression)<<std::endl;
+	std::cout << "Unswer :" << partitionMathExpression(math_expression) << std::endl;
 	return 0;
 }
