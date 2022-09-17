@@ -1,4 +1,5 @@
 #include <iostream>
+#include <stack>
 
 void fillExpressionBuffer(char *buffer)
 {
@@ -46,14 +47,14 @@ int getMathExpressionSizeFromBuffer(char *buffer)
 
 int calculateMathExpression(char *m_expression, int l, int r)
 {
-	if (m_expression == nullptr || l == r)
-		return 0;
+	if (l == r)
+		return getIntFromAsci(m_expression[l]);
 
 	int result = getIntFromAsci(m_expression[l]);
 	int temp = 0;
 	char operation = ' ';
 
-	for (int i = l; i < r; i++)
+	for (int i = l; i <= r; i++)
 	{
 		if (i % 2 == 0)
 		{
@@ -69,30 +70,39 @@ int calculateMathExpression(char *m_expression, int l, int r)
 	return result;
 }
 
-int calculate(char *m_expression)
+int calculate(char *m_expression, int l, int r)
 {
-	return 0;
-}
+	if (l == r)
+		return getIntFromAsci(m_expression[l]);
 
-int partitionMathExpression(char *m_expression)
-{
-	int left = 0, right = 0;
+	int left = l;
 	int result = 0;
-	for (int i = 0; m_expression[i] != '\0'; i++)
+	int expression_result = 0;
+	int brackets_count = 0;
+
+	for (int i = l; i <= r; i++)
 	{
-		right = i;
-		if (m_expression[i] == '+')
+		if (m_expression[i] == '(')
+			brackets_count++;
+		else if (m_expression[i] == ')')
+			brackets_count--;
+
+		if ((m_expression[i] == '+' || m_expression[i] == '-') && !brackets_count)
 		{
-			//result += partitionMathExpression(m_expression, left, right);
-			left = right + 1;
+			expression_result = calculateMathExpression(m_expression, left, i - 1);
+			std::cout << expression_result << ' ';
+			left = i + 1;
 		}
-		else if (m_expression[i] == '-')
+		else if (i == r)
 		{
-			//result -= partitionMathExpression(m_expression, left, right);
-			left = right + 1;
+			expression_result = calculateMathExpression(m_expression, left, i);
+			std::cout << expression_result << ' ';
 		}
 	}
-	return 0;
+
+	std::cout << '\n';
+
+	return result;
 }
 
 int main()
@@ -106,6 +116,7 @@ int main()
 
 	std::cout << math_expression;
 	std::cout << '\n';
-	std::cout << "Unswer :" << partitionMathExpression(math_expression) << std::endl;
+	int result = calculate(math_expression, 0, size);
+	std::cout << "Answer :" << result << std::endl;
 	return 0;
 }
