@@ -12,7 +12,7 @@ bool isValidSymbol(char sym)
 		return true;
 	return false;
 }
-int getIntFromAsci(char sym)
+int converCharToInt(char sym)
 {
 	if (sym >= 48 && sym <= 57)
 		return sym - 48;
@@ -45,63 +45,112 @@ int getMathExpressionSizeFromBuffer(char *buffer)
 	return size;
 }
 
-int calculateMathExpression(char *m_expression, int l, int r)
+int calculate(int num1, int num2, char operation)
 {
-	if (l == r)
-		return getIntFromAsci(m_expression[l]);
-
-	int result = getIntFromAsci(m_expression[l]);
-	int temp = 0;
-	char operation = ' ';
-
-	for (int i = l; i <= r; i++)
+	int result = 0;
+	switch (operation)
 	{
-		if (i % 2 == 0)
-		{
-			temp = getIntFromAsci(m_expression[i]);
-			if (operation == '*')
-				result *= temp;
-			else if (operation == '/')
-				result /= temp;
-		}
-		else
-			operation = m_expression[i];
+	case '+':
+		result = num1 + num2;
+		break;
+	case '-':
+		result = num1 - num2;
+		break;
+	case '*':
+		result = num1 * num2;
+		break;
+	case '/':
+		result = num1 / num2;
+		break;
+	default:
+		break;
 	}
 	return result;
 }
-
-int calculate(char *m_expression, int l, int r)
+bool validOperation(char operation)
 {
-	if (l == r)
-		return getIntFromAsci(m_expression[l]);
+	if (operation == '*' || operation == '/' || operation == '-' || operation == '+')
+		return true;
+	return false;
+}
 
-	int left = l;
-	int result = 0;
-	int expression_result = 0;
-	int brackets_count = 0;
-
-	for (int i = l; i <= r; i++)
+int getExpressionInBracketsLength(char *m_expression, int l, int r)
+{
+	int length = 0;
+	int brackets_count = 1;
+	int i = l;
+	while (brackets_count > 0 && m_expression[i] != '\0')
 	{
 		if (m_expression[i] == '(')
 			brackets_count++;
 		else if (m_expression[i] == ')')
 			brackets_count--;
+		i++;
+		length ++;
+	}
+	return length -1;
+}
 
-		if ((m_expression[i] == '+' || m_expression[i] == '-') && !brackets_count)
+int calculateExpression(char *m_expression, int l, int r)
+{
+	if (l == r)
+		return converCharToInt(m_expression[l]);
+
+	int result = 0, num = 0, brackets_count = 0, num_len = 0, exp_in_brack_length = 0;
+	char operation = ' ';
+
+	for (int i = l; i <= r; i++)
+	{
+		switch (m_expression[i])
 		{
-			expression_result = calculateMathExpression(m_expression, left, i - 1);
-			std::cout << expression_result << ' ';
-			left = i + 1;
-		}
-		else if (i == r)
-		{
-			expression_result = calculateMathExpression(m_expression, left, i);
-			std::cout << expression_result << ' ';
+		case '(':
+			brackets_count++;
+			num_len = 0;
+			exp_in_brack_length = getExpressionInBracketsLength(m_expression, i + 1, r);
+			break;
+		case ')':
+			brackets_count--;
+			num_len = 0;
+			break;
+		case '+':
+			num_len = 0;
+			if (!brackets_count)
+				return result + calculateExpression(m_expression, i + 1, r);
+		case '-':
+			num_len = 0;
+			if (!brackets_count)
+				return result - calculateExpression(m_expression, i + 1, r);
+		case '*':
+			operation = '*';
+			num_len = 0;
+			break;
+		case '/':
+			operation = '/';
+			num_len = 0;
+			break;
+		default:
+			if (brackets_count)
+			{
+				num = calculateExpression(m_expression, i, i + exp_in_brack_length - 1);
+				result = calculate(result, num, operation);
+				i+=exp_in_brack_length;
+				brackets_count = 0;
+			}
+			else
+			{
+				num_len++;
+				if (num_len == 1)
+					num = converCharToInt(m_expression[i]);						
+				else if (num_len > 1)
+					num = num * 10 + converCharToInt(m_expression[i]);
+
+				if (!validOperation(operation))
+					result = num;
+				else
+					result = calculate(result, num, operation);
+			}
 		}
 	}
-
-	std::cout << '\n';
-
 	return result;
 }
 
@@ -116,7 +165,8 @@ int main()
 
 	std::cout << math_expression;
 	std::cout << '\n';
-	int result = calculate(math_expression, 0, size);
+	int result = calculateExpression(math_expression, 0, size - 1);
 	std::cout << "Answer :" << result << std::endl;
+
 	return 0;
 }
